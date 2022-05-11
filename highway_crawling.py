@@ -15,14 +15,14 @@ from pandas import *
 
 datedata = read_csv("date&time.csv")
 datelist = datedata['datestring'].tolist()
-timelist = datedata['timestring'].tolist()
+timelist = datedata['timestring'][0:288].tolist()
 
 url_init = "https://tisvcloud.freeway.gov.tw/history/vd/"
 filename = "/vd_value5_"
 fileattribute = ".xml.gz"
 
-#length(datelist):
-for i in range(0,2) :     
+#len(datelist):
+for i in range(1,3) :     
     datestring = str(int(datelist[i]))
 
     url_date = url_init + datestring       
@@ -34,33 +34,33 @@ for i in range(0,2) :
         
     chromeOptions.add_experimental_option("prefs",prefs)
 
-    driver = webdriver.Chrome(options=chromeOptions)
+    driver = webdriver.Chrome(options=chromeOptions)    
+    
+    #driver.get(url_init)
 
-    driver.get(url_init)
-
-    driver.get(url_date)
+    #driver.get(url_date)
 
     print("In the page of {0}".format(datestring))    
     time.sleep(1)
 
-    #length(timelist):    
-    for j in range(0,2) : 
+    #len(timelist):    
+    for j in range(0,len(timelist)) : 
         
         timestring = str(int(timelist[j])).zfill(4)
 
         url_datetime = url_date + filename + timestring + fileattribute        
         
-        driver.get(url_date)
+        #driver.get(url_date)
         
         print("wating for downloading {0}".format(timestring),end = " ")
         
-        time.sleep(1)
+        #time.sleep(1)
         
         driver.get(url_datetime)
         
         print("done")
 
-        driver.back()
+        #driver.back()
 
     driver.close()
     driver.quit()
