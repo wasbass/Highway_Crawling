@@ -1,19 +1,26 @@
 import time
 from selenium import webdriver
 import pandas as pd
+import os
+import glob
 
 
-datedata = read_csv("date&time.csv")
+datedata = pd.read_csv("date&time.csv")
 datelist = datedata['datestring'].tolist()
-timelist = datedata['timestring'][0:288].tolist()
+timelists = datedata['timestring'][0:288].tolist()
+timelist = timelists[84:120] + timelists[204:240] #只選擇上班時間和下班時間
 
 url_init = "https://tisvcloud.freeway.gov.tw/history/vd/"
 filename = "/vd_value5_"
 fileattribute = ".xml.gz"
 
-#len(datelist):
-for i in range(4,30) :     
+
+for i in range(datelist.index(20181001.0),datelist.index(20191231.0)+1) :     
     datestring = str(int(datelist[i]))
+
+    print("wating for downloading {0}".format(datestring),end = " ")
+
+    it_exist = os.path.exists("C:\\VDdata\\"+datestring) 
 
     url_date = url_init + datestring       
 
@@ -25,26 +32,38 @@ for i in range(4,30) :
     chromeOptions.add_experimental_option("prefs",prefs)
 
     driver = webdriver.Chrome(options=chromeOptions)    
+
+    start_time = 0
     
-    #driver.get(url_init)
+    if it_exist:
+        num_of_exist_file = len(glob.glob("C:\\VDdata\\"+datestring+"\\*.gz"))
 
-    #driver.get(url_date)
+        print(num_of_exist_file ,end = " ")
 
-    print("wating for downloading {0}".format(datestring),end = " ")  
-    time.sleep(1)
-
-    #len(timelist):    
-    for j in range(0,len(timelist)) : 
+        if num_of_exist_file > 65:
+            start_time = num_of_exist_file
+    
+    for j in range(start_time,len(timelist)) :
+    #for j in range(len(timelist)-1,len(timelist)) : #如果只要再下載一筆
         
         timestring = str(int(timelist[j])).zfill(4)
 
-        url_datetime = url_date + filename + timestring + fileattribute         
+        url_datetime = url_date + filename + timestring + fileattribute
+
+        if os.path.isfile("C:\\VDdata\\"+datestring+"\\"+filename + timestring + fileattribute):
+            continue
         
-        #driver.get(url_datetime)
+        driver.get(url_datetime)
+
+    time.sleep(8)
 
     driver.close()
     driver.quit()
 
     print("done")
-    time.sleep(10)
 
+
+'''
+targetPattern = r"C:\\VDdata\\**\\*.crdownload"
+glob.glob(targetPattern)
+'''
